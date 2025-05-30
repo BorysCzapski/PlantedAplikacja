@@ -1,0 +1,57 @@
+package com.example.skibiodzi.data.database;
+
+import android.content.Context;
+
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+
+import com.example.skibiodzi.data.model.RoomEntity;
+// Importuj inne encje i DAO
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+@Database(entities = {RoomEntity.class /*, PlantEntity.class, ... */}, version = 1, exportSchema = false)
+public abstract class AppDatabase extends RoomDatabase {
+
+    public abstract RoomDao roomDao();
+    // public abstract PlantDao plantDao();
+    // ...
+
+    private static volatile AppDatabase INSTANCE;
+    private static final int NUMBER_OF_THREADS = 4;
+    public static final ExecutorService databaseWriteExecutor =
+            Executors.newFixedThreadPool(NUMBER_OF_THREADS); // Do operacji zapisu w tle
+
+    public static AppDatabase getDatabase(final Context context) {
+        if (INSTANCE == null) {
+            synchronized (AppDatabase.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                                    AppDatabase.class, "skibiodzi_database")
+                            .fallbackToDestructiveMigration() // Ostrożnie na produkcji
+                            // .addCallback(sRoomDatabaseCallback) // Można dodać callback do np. populacji danych
+                            .build();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+    // Opcjonalny Callback do np. wstępnego wypełnienia bazy danych
+    /*
+    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+            super.onCreate(db);
+            databaseWriteExecutor.execute(() -> {
+                // Wypełnij bazę danych, jeśli jest pusta
+                RoomDao dao = INSTANCE.roomDao();
+                // dao.insertRoom(new RoomEntity("Salon"));
+                // dao.insertRoom(new RoomEntity("Sypialnia"));
+            });
+        }
+    };
+    */
+}
