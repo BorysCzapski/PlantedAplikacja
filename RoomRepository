@@ -1,0 +1,57 @@
+package com.example.skibiodzi.data.repository;
+
+import androidx.lifecycle.LiveData;
+
+import com.example.skibiodzi.data.database.AppDatabase;
+import com.example.skibiodzi.data.database.RoomDao;
+import com.example.skibiodzi.data.model.RoomEntity;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+public class RoomRepository {
+    private RoomDao roomDao;
+    private LiveData<List<RoomEntity>> allRooms;
+    private ExecutorService executorService;
+
+    @Inject
+    public RoomRepository(RoomDao roomDao, ExecutorService executorService) {
+        this.roomDao = roomDao;
+        this.allRooms = roomDao.getAllRooms();
+        this.executorService = executorService; // Wstrzyknięty ExecutorService
+    }
+
+    public LiveData<List<RoomEntity>> getAllRooms() {
+        return allRooms;
+    }
+
+    public void insert(RoomEntity room) {
+        executorService.execute(() -> roomDao.insertRoom(room));
+    }
+
+    public void update(RoomEntity room) {
+        executorService.execute(() -> roomDao.updateRoom(room));
+    }
+
+    public void delete(RoomEntity room) {
+        executorService.execute(() -> roomDao.deleteRoom(room));
+    }
+
+    // Dla operacji, które zwracają dane synchronicznie (jak getById),
+    // musisz obsłużyć je inaczej, np. przez Callable i LiveData, albo callback
+    // Poniżej prosty przykład z callbackiem, ale lepiej użyć LiveData dla pojedynczych obiektów też.
+    /*
+    public void getRoomById(int roomId, Consumer<RoomEntity> callback) {
+        executorService.execute(() -> {
+            RoomEntity room = roomDao.getRoomById(roomId);
+            // Przekaż wynik z powrotem na główny wątek, jeśli jest to potrzebne
+            // new Handler(Looper.getMainLooper()).post(() -> callback.accept(room));
+            callback.accept(room); // Prostsza wersja, jeśli callback sam zarządza wątkiem
+        });
+    }
+    */
+}
