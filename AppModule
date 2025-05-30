@@ -1,0 +1,47 @@
+package com.example.skibiodzi.di;
+
+import android.content.Context;
+
+import com.example.skibiodzi.data.database.AppDatabase;
+import com.example.skibiodzi.data.database.RoomDao;
+// Importuj inne DAO i repozytoria
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import dagger.hilt.components.SingletonComponent;
+
+@Module
+@InstallIn(SingletonComponent.class)
+public class AppModule {
+
+    private static final int NUMBER_OF_THREADS = 4;
+
+    @Singleton
+    @Provides
+    public static AppDatabase provideAppDatabase(@ApplicationContext Context context) {
+        return AppDatabase.getDatabase(context);
+    }
+
+    @Singleton
+    @Provides
+    public static RoomDao provideRoomDao(AppDatabase appDatabase) {
+        return appDatabase.roomDao();
+    }
+    // ... inne providers dla DAO
+
+    @Singleton
+    @Provides
+    public static ExecutorService provideExecutorService() {
+        return Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+    }
+
+    // Repozytoria (RoomRepository) są zwykle dostarczane przez konstruktor @Inject,
+    // Hilt automatycznie je utworzy, jeśli ich zależności (RoomDao, ExecutorService) są dostarczane.
+}
