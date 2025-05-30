@@ -1,0 +1,52 @@
+package com.example.skibiodzi.ui.viewmodel;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.example.skibiodzi.data.model.RoomEntity;
+import com.example.skibiodzi.data.repository.RoomRepository;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
+public class RoomViewModel extends ViewModel {
+
+    private final RoomRepository roomRepository;
+    private final LiveData<List<RoomEntity>> allRooms;
+    private final MutableLiveData<String> newRoomName = new MutableLiveData<>(""); // Dla dwukierunkowego bindowania lub obserwacji
+
+    @Inject
+    public RoomViewModel(RoomRepository roomRepository) {
+        this.roomRepository = roomRepository;
+        this.allRooms = roomRepository.getAllRooms();
+    }
+
+    public LiveData<List<RoomEntity>> getAllRooms() {
+        return allRooms;
+    }
+
+    public MutableLiveData<String> getNewRoomName() {
+        return newRoomName;
+    }
+
+    public void setNewRoomName(String name) {
+        newRoomName.setValue(name);
+    }
+
+    public void addRoom() {
+        String name = newRoomName.getValue();
+        if (name != null && !name.trim().isEmpty()) {
+            roomRepository.insert(new RoomEntity(name.trim()));
+            newRoomName.setValue(""); // Wyczyść pole po dodaniu
+        }
+    }
+
+    public void deleteRoom(RoomEntity room) {
+        roomRepository.delete(room);
+    }
+}
