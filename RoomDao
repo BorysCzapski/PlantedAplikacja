@@ -1,0 +1,32 @@
+package com.example.skibiodzi.data.database;
+
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
+
+import com.example.skibiodzi.data.model.RoomEntity;
+
+import java.util.List;
+
+@Dao
+public interface RoomDao {
+
+    @Query("SELECT * FROM rooms ORDER BY name ASC")
+    LiveData<List<RoomEntity>> getAllRooms(); // Zwraca LiveData dla obserwacji w UI
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertRoom(RoomEntity room); // Operacje na bazie danych powinny być wykonywane w tle
+
+    @Update
+    void updateRoom(RoomEntity room);
+
+    @Delete
+    void deleteRoom(RoomEntity room);
+
+    @Query("SELECT * FROM rooms WHERE id = :roomId")
+    RoomEntity getRoomById(int roomId); // To również powinno być wywoływane w tle
+}
