@@ -1,0 +1,39 @@
+package com.example.skibiodzi.data.model;
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull; // Dobra praktyka dla pól non-null
+
+@Entity(tableName = "rooms")
+public class RoomEntity {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @NonNull
+    private String name;
+
+    // Konstruktor
+    public RoomEntity(@NonNull String name) {
+        this.name = name;
+    }
+
+    // Gettery i Settery (Setter dla id jest ważny dla Room)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @NonNull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(@NonNull String name) {
+        this.name = name;
+    }
+
+    // Opcjonalnie: equals, hashCode, toString
